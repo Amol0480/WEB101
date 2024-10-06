@@ -19,19 +19,22 @@ const validateEmail = (email) => {
     return emailRegex.test(email);
 };
 
-// Clear all entries from localStorage when the page is loaded (this will clear on refresh)
-const clearEntriesOnRefresh = () => {
-    localStorage.removeItem('entries');
+// Load saved entries from localStorage and display in the table
+const loadEntries = () => {
+    const entries = JSON.parse(localStorage.getItem('entries')) || [];
+    entries.forEach(entry => {
+        addEntryToTable(entry);
+    });
 };
 
-// Add entry to table
+// Add entry to the table
 const addEntryToTable = (entry) => {
     const row = document.createElement('tr');
     row.innerHTML = `<td>${entry.name}</td><td>${entry.email}</td><td>${entry.password}</td><td>${entry.dob}</td><td>${entry.acceptedTerms}</td>`;
     document.getElementById('entriesTable').appendChild(row);
 };
 
-// Save new entry to localStorage
+// Save new entry to localStorage and append it to existing entries
 const saveEntry = (entry) => {
     let entries = JSON.parse(localStorage.getItem('entries')) || [];
     entries.push(entry);
@@ -48,23 +51,33 @@ document.getElementById('registrationForm').addEventListener('submit', function 
     const dob = document.getElementById('dob').value;
     const acceptedTerms = document.getElementById('terms').checked;
 
+    // Validate the date of birth
     if (!validateAge(dob)) {
         alert('You must be between 18 and 55 years old.');
         return;
     }
 
+    // Validate the email format
     if (!validateEmail(email)) {
         alert('Invalid email address.');
         return;
     }
 
     const entry = { name, email, password, dob, acceptedTerms: acceptedTerms ? 'true' : 'false' };
+    
+    // Save the new entry to localStorage
     saveEntry(entry);
+    
+    // Add the new entry to the table
     addEntryToTable(entry);
 
-    // Reset form
+    // Reset the form for the next submission
     this.reset();
 });
+
+// Load saved entries on page load
+window.onload = loadEntries;
+
 
 // Clear all entries on page load
 window.onload = clearEntriesOnRefresh;
